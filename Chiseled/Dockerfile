@@ -68,7 +68,7 @@ ENV POWERSHELL_TELEMENTRY_OPTOUT=1
 
 
 # # We don't do apk upgrade because its sensitive to when the build was run, instead we rely on the source alpine images.
-ENTRYPOINT [ "/opt/microsoft/powershell/7/pwsh", "-noni", "-f" ]
+ENTRYPOINT [ "/opt/microsoft/powershell/7/pwsh", "-noni", "-c" ]
 # # # Set pwsh as the shell for next step and disable any telemetry for builds
 # #
 # # SHELL ["/opt/microsoft/powershell/7/pwsh", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
