@@ -1,14 +1,15 @@
 #These args will vary based on the build
-ARG DIST=noble
+ARG DIST=azurelinux3.0-distroless
 ARG DOTNET_VERSION=9.0
-ARG PS_VERSION=7.5.0
+ARG PS_VERSION=7.4.0
 
 #You wont typically need to vary these args
 ARG PS_PACKAGE=powershell-${PS_VERSION}-linux-x64-fxdependent.tar.gz
 ARG PS_PACKAGE_URL=https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/${PS_PACKAGE}
 ARG PS_INSTALL_FOLDER=/opt/microsoft/powershell/7
 ARG LANG=en_US.UTF-8
-ARG IMAGE=mcr.microsoft.com/dotnet/runtime:$DOTNET_VERSION-$DIST-chiseled
+ARG IMAGE=mcr.microsoft.com/dotnet/runtime:$DOTNET_VERSION-$DIST
+ARG TAG=$PS_VERSION-$DOTNET_VERSION-$DIST
 
 #STAGE: Install PowerShell
 FROM alpine AS install-powershell
@@ -61,14 +62,13 @@ ENV LC_ALL=en_US.UTF-8
 ENV LANG=en_US.UTF-8
 
 #PowerShell Specific: https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_environment_variables?view=powershell-7.4
-ENV POWERSHELL_DISTRIBUTION_CHANNEL=JustinGrote-PowerShell-Containers-Chiseled-$TAG
+ENV POWERSHELL_DISTRIBUTION_CHANNEL=JustinGrote-PowerShell-Containers-$TAG
 ENV POWERSHELL_UPDATECHECK=Off
-ENV POWERSHELL_TELEMENTRY_OPTOUT=1
+# ENV POWERSHELL_TELEMETRY_OPTOUT=1
 # # ca-certificates no longer needed: https://learn.microsoft.com/en-us/dotnet/core/compatibility/containers/8.0/ca-certificates-package
 
 
 # # We don't do apk upgrade because its sensitive to when the build was run, instead we rely on the source alpine images.
-USER app
 ENTRYPOINT [ "/opt/microsoft/powershell/7/pwsh", "-noni", "-c" ]
 # # # Set pwsh as the shell for next step and disable any telemetry for builds
 # #

@@ -1,14 +1,14 @@
 #These args will vary based on the build
 ARG DIST=noble
-ARG DOTNET_VERSION=9.0
-ARG PS_VERSION=7.5.0
+ARG DOTNET_VERSION=8.0
+ARG PS_VERSION=7.4.0
 
 #You wont typically need to vary these args
 ARG PS_PACKAGE=powershell-${PS_VERSION}-linux-x64-fxdependent.tar.gz
 ARG PS_PACKAGE_URL=https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/${PS_PACKAGE}
 ARG PS_INSTALL_FOLDER=/opt/microsoft/powershell/7
 ARG LANG=en_US.UTF-8
-ARG IMAGE=mcr.microsoft.com/dotnet/runtime:$DOTNET_VERSION-$DIST-chiseled
+ARG IMAGE=mcr.microsoft.com/dotnet/runtime:$DOTNET_VERSION-$DIST-chiseled-extra
 
 #STAGE: Install PowerShell
 FROM alpine AS install-powershell
@@ -68,7 +68,6 @@ ENV POWERSHELL_TELEMENTRY_OPTOUT=1
 
 
 # # We don't do apk upgrade because its sensitive to when the build was run, instead we rely on the source alpine images.
-USER app
 ENTRYPOINT [ "/opt/microsoft/powershell/7/pwsh", "-noni", "-c" ]
 # # # Set pwsh as the shell for next step and disable any telemetry for builds
 # #
