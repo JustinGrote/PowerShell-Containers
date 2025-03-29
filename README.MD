@@ -5,20 +5,37 @@
 This repository contains some modern container builds for running PowerShell scripts in a small footprint, minimal dependency, small security surface area.
 
 ## Quick Start
+> [!NOTE]
+By default the container will run any powershell script passed to it as an argument, either directly or via stdin.
+
 `docker run ghcr.io/justingrote/powershell '"Welcome to PowerShell $($PSVersionTable.PSVersion)"'`
 
 > Welcome to PowerShell 7.5.0
 
 ## Popular/Recommended Tags
+> [!NOTE]
 Unless otherwise specified, the base distro is [Azure Linux 3.0 distroless](https://github.com/dotnet/dotnet-docker/blob/main/documentation/azurelinux.md)
+
 * `latest` - latest stable version
 * `lts` - latest lts version
-* `7` - latest 7.x version
-* `7-lts` - latest 7.x lts version (e.g. 7.4.x but not 7.5.x)
-* `7.4` - latest 7.4.x version
-* `7.4.0` - "pinned" version to the version you specify
-* `azurelinux3.0-distroless` - latest version using [.NET Azure Linux 3.0 distroless](https://github.com/dotnet/dotnet-docker/blob/main/documentation/azurelinux.md)
-* `noble-chiseled` - latest version using [.NET Chiseled](https://github.com/dotnet/dotnet-docker/blob/main/documentation/ubuntu-chiseled.md)
+* `X` - latest specified major version. For example: `7` is the latest 7.x.x version
+* `X-lts` - latest specified major lts version (e.g. `7-lts` is 7.4.Z but not 7.5.Z)
+* `X.Y` - latest feature version. For example: `7.4` is latest 7.4.Z version.
+* `7.X.Y` - "pinned" version to the version you specify. For example: `7.4.2` will always be `7.4.2`
+* `azurelinux3.0-distroless` - latest stable version using [.NET Azure Linux 3.0 distroless](https://github.com/dotnet/dotnet-docker/blob/main/documentation/azurelinux.md)
+* `noble-chiseled` - latest stable version using [.NET Chiseled](https://github.com/dotnet/dotnet-docker/blob/main/documentation/ubuntu-chiseled.md)
+
+> [!TIP]
+There are direct tags you can pin to a specific version and architecture. These tags should be considered relatively stable but not immutable, as changes to the image build process or bugfixes may be required, but the PowerShell version specified will remain the same.
+
+
+
+## Bundling
+To create new container applications, define a new dockerfile that bundles your script.
+
+* [Standalone Script Example](Examples/Script/README.MD)
+* [Script with Modules Example](Examples/ScriptWithModules/README.MD)
+
 
 ## About These Containers
 
@@ -33,24 +50,8 @@ The image also runs under a local non-root user by default.
 
 By default, there is no writable filesystem access besides /tmp and /home/app for security. You can layer in writable filesystems if needed, but it is recommended to mount volumes instead.
 
-## Tagging Strategy
-Fully qualified tags describe the complete variant of the container. Shorter tags represent the "latest" version. For example:
-
-`powershell:7.4.7-dotnet-8.0.14-azurelinux3.0-distroless-amd64` - Fully Qualified module name
-`powershell:7.4.7-dotnet-8.0.14-azurelinux3.0-distroless` - Assumes amd64 (most popular image architecture)
-`powershell:7.4.7` - Assumes AzLinux3.0 distroless amd64
-`powershell:7.4` - Maps to latest 7.4 servicing branch (e.g. will automap to 7.4.8 if released)
-`powershell:7` - Maps to latest feature branch (e.g. will automap to latest 7.6.2)
-`powershell:latest` - Maps to the latest non-preview version available
-
-I'm still debating how to handle .Net servicing updates, whether we generate a giant matrix of every possible combination, or if we uptag in-place.
-
-## Flavors
-* **Azure Linux 3.0 Distroless**: A Microsoft Linux distro optimized for running in cloud workloads.
-* **DotNet Chiseled**: A highly stripped down version of Debian barebones optimized to run dotnet applications.
-
 Alpine builds have been deprecated for now in favor of distroless builds. Interactive users should use the official .NET SDK or Devcontainer images.
 
 ## Updates
-There are plans to auto-generate new images upon new PowerShell release within 24 hours, potentially as soon as a release is posted.
 
+There are plans to auto-generate new images upon new PowerShell release within 24 hours, potentially as soon as a release is posted.
