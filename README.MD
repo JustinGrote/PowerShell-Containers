@@ -2,7 +2,19 @@
 
 ![PowerShell Containers](images/README/image.png)
 
-This repository contains some modern container builds for running PowerShell scripts in a small footprint, minimal dependency, small security surface area.
+This repository contains some modern container builds for running PowerShell scripts.
+
+Optimized for:
+
+🤏 Small Footprint (~100Mb)
+
+⏱️ High Performance
+
+👮 Minimal Security Surface Area
+
+---
+
+<video controls src="images/README/image-1.png" title="Demo"></video>
 
 ## Quick Start
 > [!NOTE]
@@ -27,8 +39,6 @@ Unless otherwise specified, the base distro is [Azure Linux 3.0 distroless](http
 
 > [!TIP]
 There are direct tags you can pin to a specific version and architecture. These tags should be considered relatively stable but not immutable, as changes to the image build process or bugfixes may be required, but the PowerShell version specified will remain the same.
-
-
 
 ## Bundling
 To create new container applications, define a new dockerfile that bundles your script.
