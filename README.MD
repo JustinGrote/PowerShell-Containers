@@ -14,7 +14,7 @@ Optimized for:
 
 ---
 
-<video controls src="images/README/image-1.png" title="Demo"></video>
+https://github.com/user-attachments/assets/c3fb3fd7-cc5d-4146-a7d9-ef823d6d99ed
 
 ## Quick Start
 > [!NOTE]
