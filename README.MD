@@ -1,12 +1,14 @@
-# PowerShell Runtime Containers
+# [PowerShell Runtime Containers](https://ghcr.io/justingrote/powershell)
 
-![PowerShell Containers](images/README/image.png)
+![PowerShell Runtime Containers](images/README/image.png)
 
-This repository contains some modern container builds for running PowerShell scripts.
+This repository provides modern container builds for running PowerShell Scripts.
+
+Found at: [ghcr.io/justingrote/powershell](https://ghcr.io/justingrote/powershell)
 
 Optimized for:
 
-🤏 Small Footprint (~100Mb)
+🤏 Small Footprint (~140Mb)
 
 ⏱️ High Performance
 
