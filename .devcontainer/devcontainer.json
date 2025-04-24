@@ -1,6 +1,4 @@
 {
-  "image": "mcr.microsoft.com/devcontainers/universal:2",
-  "features": {
-    "ghcr.io/devcontainers/features/powershell:1": {}
-  }
+  "image": "mcr.microsoft.com/devcontainers/dotnet",
+  "initializeCommand": "docker images -a"
 }
