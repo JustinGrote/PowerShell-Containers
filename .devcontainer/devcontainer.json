@@ -2,6 +2,9 @@
   "name": "PowerShell Runtime Containers",
   "image": "mcr.microsoft.com/devcontainers/dotnet:1-10.0-preview-trixie-slim", //Trixie needed for podman/buildah updates
   "privileged": true,
+  "hostRequirements": {
+    "cpus": 4 // To build containers in parallel and match the GitHub Actions environment
+  },
   "initializeCommand": "docker images -a", //To see what images are cached on the devcontainer or host
   "postCreateCommand": "sudo apt-get update && sudo apt-get install -y podman skopeo && sudo mount --make-rshared / && sudo ln -s /usr/bin/podman /usr/bin/docker",
   "customizations": {
