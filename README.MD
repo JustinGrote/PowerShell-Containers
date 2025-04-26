@@ -18,7 +18,7 @@ Optimized for:
 
 https://github.com/user-attachments/assets/c3fb3fd7-cc5d-4146-a7d9-ef823d6d99ed
 
-## Quick Start
+## ⚡ Quick Start
 > [!NOTE]
 By default the container will run any powershell script passed to it as an argument, either directly or via stdin.
 
@@ -26,7 +26,7 @@ By default the container will run any powershell script passed to it as an argum
 
 > Welcome to PowerShell 7.5.0
 
-## Popular/Recommended Tags
+## 🏷️ Tags
 > [!NOTE]
 Unless otherwise specified, the base distro is [Azure Linux 3.0 distroless](https://github.com/dotnet/dotnet-docker/blob/main/documentation/azurelinux.md)
 
@@ -42,7 +42,7 @@ Unless otherwise specified, the base distro is [Azure Linux 3.0 distroless](http
 > [!TIP]
 There are direct tags you can pin to a specific version and architecture. These tags should be considered relatively stable but not immutable, as changes to the image build process or bugfixes may be required, but the PowerShell version specified will remain the same.
 
-## Bundling
+## 📦 Bundling
 To create new container applications, define a new dockerfile that bundles your script.
 
 * [Standalone Script Example](Examples/Script/README.MD)
