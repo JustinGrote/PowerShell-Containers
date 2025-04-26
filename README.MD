@@ -51,18 +51,22 @@ To create new container applications, define a new dockerfile that bundles your 
 
 ## About These Containers
 
-These images run the fxdependent version of PowerShell, with some additional features removed to reduce size:
+These images run the self-contained version of PowerShell on top of the dotnet/runtime-deps container, with some additional features removed to reduce size:
 1. PowerShellGet/PSResourceGet/PackageManagement removed (you should bundle modules into your container directly)
 1. Help Removed
 1. PSReadline Removed (this is not meant for interactive use)
 1. Some unnecessary assemblies for most workloads removed (SQLClient, ODBC, etc.). You should bundle in modern equivalents with your docker image if you need these.
 1. Localization Support removed. If there is sufficient demand for a localization-enabled container, I will build a version based on AzureLinux-extra which includes the required localization parts.
 
+The images are multi-arch, supporting x64 and arm64-v8.
+
 The image also runs under a local non-root user by default. 
 
 By default, there is no writable filesystem access besides /tmp and /home/app for security. You can layer in writable filesystems if needed, but it is recommended to mount volumes instead.
 
 Alpine builds have been deprecated for now in favor of distroless builds. Interactive users should use the official .NET SDK or Devcontainer images.
+
+While fxdependent is smaller, the self-contained images contain precompliation that result in a huge (50%+) startup CPU and time cost, so the minor extra 30MB or so is considered worth the size increase, especially since the size is a one-time hit.
 
 ## Updates
 

@@ -1,4 +1,16 @@
 {
-  "image": "mcr.microsoft.com/devcontainers/dotnet",
-  "initializeCommand": "docker images -a"
+  "name": "PowerShell Runtime Containers",
+  "image": "mcr.microsoft.com/devcontainers/dotnet:1-10.0-preview-trixie-slim", //Trixie needed for podman/buildah updates
+  "privileged": true,
+  "initializeCommand": "docker images -a", //To see what images are cached on the devcontainer or host
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y podman skopeo && sudo mount --make-rshared / && sudo ln -s /usr/bin/podman /usr/bin/docker",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.powershell",
+        "ms-azuretools.vscode-containers",
+        "GitHub.vscode-pull-request-github"
+      ]
+    }
+  }
 }
