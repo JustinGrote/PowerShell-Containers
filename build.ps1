@@ -3,7 +3,7 @@ using namespace System.Management.Automation
 [CmdletBinding()]
 param(
 	#The minimum version to build for. This should be increased when EOL dates are reached.
-	[SemanticVersion]$minimumPSVersion = '7.5',
+	[SemanticVersion]$minimumPSVersion = '7.4',
 	#For now, our build process is the same for both. This may change in the future
 	$Distributions = @(
 		'noble-chiseled'
@@ -14,7 +14,9 @@ param(
 	$LocalImageName = 'powershell',
 	$remoteImageName = 'ghcr.io/justingrote/powershell',
 	#Push to remote repo
-	[switch]$Push
+	[switch]$Push,
+	#By default, does not rebuild images that already exist. Use -Force to override.
+	[switch]$Force
 )
 
 $irmParams = @{
@@ -51,7 +53,6 @@ foreach ($release in $pwshReleases) {
 
 		$powershellTag = "$version-$distribution"
 		$powershellImageTag = "$LocalImageName`:$powershellTag"
-		$powershellRemoteTag = "$remoteImageName`:$powershellTag"
 
 		Write-Verbose "🟢: Building PowerShell $powershellTag"
 
@@ -91,10 +92,9 @@ foreach ($release in $pwshReleases) {
 				'--build-arg', "DIST=$distribution",
 				'--build-arg', "PS_VERSION=$version",
 				'--build-arg', "DOTNET_VERSION=$dotnetVersion"
-				'--platform', ($platforms -join ',')
+				'--platform', ($platforms -join ','),
 				'--manifest', $powershellImageTag
 			)
-
 
 			Write-Debug "podman Build Args: $($podmanBuildArgs -join ' ')"
 
@@ -116,6 +116,31 @@ foreach ($release in $pwshReleases) {
 			if ($testResult -ne $testValue) {
 				Write-Error "PowerShell Image $powershellImageTag failed basic PowerShell script test"
 				continue
+			}
+
+			#Add annotations
+			$annotations = @{
+				'org.opencontainers.image.source'      = 'https://github.com/JustinGrote/PowerShell-Containers'
+				'org.opencontainers.image.title'       = "PowerShell Runtime Container $($version.ToString()) for $distribution"
+				'org.opencontainers.image.description' = 'Run PowerShell in a low footprint, high performance, and secure environment'
+				'org.opencontainers.image.licenses'    = 'MIT'
+				'org.opencontainers.image.authors'     = 'Justin Grote'
+				'org.opencontainers.image.version'     = $version.ToString()
+				'org.opencontainers.image.revision'    = $release.tag_name
+				'org.opencontainers.image.created'     = (Get-Date -Format 'o')
+			}
+
+			foreach ($annotation in $annotations.GetEnumerator()) {
+				Write-Verbose "🏷️ $($annotation.Key)=$($annotation.Value)"
+				$annotateArgs = @(
+					'--index'
+					'--annotation'
+					"$($annotation.Key)=$($annotation.Value)"
+				)
+				$annotatedDigest = & podman manifest annotate @annotateArgs $powershellImageTag
+				if ($LASTEXITCODE -ne 0) {
+					continue
+				}
 			}
 
 			#Check for rollup tag candidates. Since we start with Azure Linux, it will always default to those distro images first.
@@ -158,23 +183,46 @@ foreach ($release in $pwshReleases) {
 				}
 			}
 
-			$psExtraTags = foreach ($tag in $additionalTags) {
-				"powershell:$tag"
-			}
-			podman tag $powershellImageTag @additionalTags
-
-			if ($Push) {
-				Write-Debug "Pushing $powershellImageTag to $powershellRemoteTag"
-				podman push $powershellImageTag $powershellRemoteTag
-
-				if ($psExtraTags) {
-					foreach ($tag in $additionalTags) {
-						Write-Debug "Pushing additional tag $tag to $psExtraTags"
-						podman push $powershellImageTag "$remoteImageName`:$tag"
-					}
+			if ($version.PrereleaseLabel) {
+				if ($latestTag.Add('preview')) {
+					Write-Verbose "🎯 $powerShellImageTag will be additionally tagged as preview"
+					$additionalTags += 'preview'
 				}
 			}
 
+			if ($additionalTags) {
+				[string[]]$psExtraTags = $additionalTags | ForEach-Object {
+					"${LocalImageName}:$_"
+				}
+				Write-Verbose "🏷️ Adding Tags: $psExtraTags"
+				podman tag $powershellImageTag @psExtraTags
+			}
+
+			if ($Push) {
+				[string[]]$pushTags = $powershellTag
+				if ($additionalTags) {
+					$pushTags += $additionalTags
+				}
+				$pushArgs = @(
+					'--compression-format', 'gzip'
+					'--add-compression', 'zstd:chunked'
+				)
+
+				foreach ($tag in $pushTags) {
+					$remoteTag = "${remoteImageName}:$tag"
+					Write-Verbose "📤 Pushing $powershellImageTag to $remoteTag"
+					[string[]]$podmanLogs = @()
+					podman manifest push @pushArgs $powershellImageTag $remoteTag *>&1
+					| ForEach-Object {
+						$podmanLogs += $_
+						Write-Debug "${remoteTag}: $_"
+					}
+					if ($LASTEXITCODE -ne 0) {
+						Write-Error "podman Push Failed for tag ${tag}: `n $($podmanLogs -join '`n')"
+						continue
+					}
+				}
+			}
 		} catch {
 			Write-Host -Fore Magenta $podmanLogs
 			throw
