@@ -7,6 +7,9 @@
   },
   "initializeCommand": "docker images -a", //To see what images are cached on the devcontainer or host
   "postCreateCommand": "sudo apt-get update && sudo apt-get install -y podman skopeo && sudo mount --make-rshared / && sudo ln -s /usr/bin/podman /usr/bin/docker",
+  "containerEnv": {
+    "PODMAN_IGNORE_CGROUPSV1_WARNING": "true"
+  },
   "customizations": {
     "vscode": {
       "extensions": [
