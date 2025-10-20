@@ -1,12 +1,6 @@
 name: Build and Publish PowerShell Containers
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - build.ps1
-      - .github/workflows/build-and-publish.yml
   workflow_dispatch:
     inputs:
       imageName:
@@ -48,7 +42,7 @@ jobs:
 
     - name: Build and publish containers
       shell: pwsh
-      run: ./build.ps1 -Verbose -Debug -Push -Architecture amd64 -RemoteImageName 'ghcr.io/${{ github.repository_owner }}/${{ github.event.inputs.imageName }}' -Versions '${{ github.event.inputs.versions }}'
+      run: ./build.ps1 -Verbose -Debug -Push -Architecture amd64 -RemoteImageName 'ghcr.io/${{ github.repository_owner }}/${{ inputs.imageName }}' -Versions '${{ inputs.versions }}'
 
     - name: List built images
       run: podman images --filter reference=powershell --format "table {{.Repository}}:{{.Tag}} {{.Size}} {{.Created}}"
