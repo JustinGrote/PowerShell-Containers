@@ -2,6 +2,14 @@ name: Build and Publish PowerShell Containers
 
 on:
   push:
+    inputs:
+      imageName:
+        description: 'Container image name (e.g. powershell-test)'
+        required: true
+        default: 'powershell-test'
+      versions:
+        description: 'PowerShell versions to build (comma-separated, e.g. 7.2.6,7.3.4)'
+        required: false
     branches:
       - main
     paths:
@@ -59,7 +67,18 @@ jobs:
       run: |
         # The login step above doesn't seem to persist for some reason, so re-login here
         podman login ghcr.io/justingrote
-        ./build.ps1 -Verbose -Debug -Push -Architecture amd64 -RemoteImageName 'ghcr.io/${{ github.repository_owner }}/${{ inputs.imageName }}' -Versions '${{ inputs.versions }}'
+
+        # Build args and only add -Versions if provided
+        $args = @(
+          '-Verbose','-Debug','-Push',
+          '-Architecture','amd64',
+          '-RemoteImageName',"ghcr.io/${{ github.repository_owner }}/${{ inputs.imageName }}"
+        )
+        if (-not [string]::IsNullOrWhiteSpace('${{ inputs.versions }}')) {
+          $args += @('-Versions','${{ inputs.versions }}')
+        }
+
+        ./build.ps1 @args
 
     - name: List built images
       run: podman images --filter reference=powershell --format "table {{.Repository}}:{{.Tag}} {{.Size}} {{.Created}}"
