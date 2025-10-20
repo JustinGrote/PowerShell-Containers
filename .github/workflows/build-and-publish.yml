@@ -39,7 +39,11 @@ jobs:
         registry: ghcr.io/${{ env.repo_owner_lower }}
         username: ${{ env.repo_owner_lower }}
         password: ${{ secrets.GITHUB_TOKEN }}
-
+    - name: Breakpoint if debug retry
+      if: ${{ env.ACTIONS_STEP_DEBUG == 'true' }}
+      uses: namespacelabs/breakpoint-action@v0
+      with:
+        duration: 30m
     - name: Build and publish containers
       shell: pwsh
       run: ./build.ps1 -Verbose -Debug -Push -Architecture amd64 -RemoteImageName 'ghcr.io/${{ github.repository_owner }}/${{ inputs.imageName }}' -Versions '${{ inputs.versions }}'
