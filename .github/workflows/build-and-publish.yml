@@ -45,7 +45,8 @@ jobs:
       uses: namespacelabs/breakpoint-action@v0
       with:
         duration: 30m
-        authorized-users: ${{ github.actor }}
+        authorized-users: justingrote
+        authorized-keys: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA7rgymJb1ra+772/X9XDK3OOMiPlYx/NWKZIbOx+tFa
 
     - name: Build and publish containers
       shell: pwsh
