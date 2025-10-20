@@ -68,7 +68,7 @@ jobs:
         # The login step above doesn't seem to persist for some reason, so re-login here
         podman login ghcr.io/${{ github.repository_owner }}
 
-        ./build.ps1 -Verbose -Debug -Push -Architecture amd64 -RemoteImageName "ghcr.io/${{ github.repository_owner }}/${{ inputs.imageName }}" ${{ toJSON(inputs.versions) == '{}' ? '' : "-Versions '${{ inputs.versions }}'" }}
+        ./build.ps1 -Verbose -Debug -Push -Architecture amd64 -RemoteImageName "ghcr.io/${{ github.repository_owner }}/${{ inputs.imageName }}" ${{ toJSON(inputs.versions) == '{}' && '' || format('-Versions "{0}"', inputs.versions) }}
 
     - name: List built images
       run: podman images --filter reference=powershell --format "table {{.Repository}}:{{.Tag}} {{.Size}} {{.Created}}"
