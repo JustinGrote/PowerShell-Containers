@@ -20,7 +20,8 @@ jobs:
   build-and-publish:
     runs-on: ubuntu-latest
     environment: Github Container Registry - Test
-
+    env:
+      ACTIONS_STEP_DEBUG: ${{ secrets.ACTIONS_STEP_DEBUG }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
