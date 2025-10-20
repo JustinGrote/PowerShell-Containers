@@ -24,6 +24,6 @@ Pin-Priority: 400
 
 # Update APT cache
 sudo apt update
-sudo apt install -y podman buildah
+sudo apt install -y podman buildah crun
 
 Write-Host "Plucky pinning setup complete."
