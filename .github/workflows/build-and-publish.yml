@@ -66,7 +66,7 @@ jobs:
       shell: pwsh
       run: |
         # The login step above doesn't seem to persist for some reason, so re-login here
-        podman login ghcr.io/justingrote
+        podman login ghcr.io/${{ github.repository_owner }}
 
         # Build args and only add -Versions if provided
         $args = @(
