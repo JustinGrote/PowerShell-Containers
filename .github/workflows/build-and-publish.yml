@@ -44,7 +44,7 @@ jobs:
 
     - name: Build and publish containers
       shell: pwsh
-      run: ./build.ps1 -Verbose -Debug -Push -Architecture amd64 -RemoteImageName "ghcr.io/${{ github.repository_owner }}/${{ github.event.inputs.imageName }}" -Versions '7.5.2','7.4.11','7.4.9'
+      run: ./build.ps1 -Verbose -Debug -Push -Architecture amd64 -RemoteImageName "ghcr.io/${{ github.repository_owner }}/${{ github.event.inputs.imageName }}" -Versions '7.5.4','7.5.3','7.4.13','7.4.12'
 
     - name: List built images
       run: podman images --filter reference=powershell --format "table {{.Repository}}:{{.Tag}} {{.Size}} {{.Created}}"
