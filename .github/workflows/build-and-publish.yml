@@ -7,7 +7,7 @@ on:
         description: 'Container image name (e.g. powershell-test)'
         required: true
         default: 'powershell-test'
-      versions:
+      specificVersions:
         description: 'PowerShell versions to build (comma-separated, e.g. 7.2.6,7.3.4)'
         required: false
     branches:
@@ -21,7 +21,7 @@ on:
         description: 'Container image name (e.g. powershell-test)'
         required: true
         default: 'powershell-test'
-      versions:
+      specificVersions:
         description: 'PowerShell versions to build (comma-separated, e.g. 7.2.6,7.3.4)'
         required: true
         default: '7.5.4'
@@ -67,8 +67,11 @@ jobs:
       run: |
         # The login step above doesn't seem to persist for some reason, so re-login here
         podman login ghcr.io/${{ github.repository_owner }}
-
-        ./build.ps1 -Verbose -Debug -Push -Architecture amd64 -RemoteImageName "ghcr.io/${{ github.repository_owner }}/${{ inputs.imageName }}" ${{ toJSON(inputs.versions) == '{}' && '' || format('-Versions "{0}"', inputs.versions) }}
+        $splat = @()
+        if ('${{ inputs.specificVersions }}' -ne '') {
+          $splat['Versions'] = '${{ inputs.specificVersions }}'
+        }
+        ./build.ps1 -Verbose -Debug -Push -Architecture amd64 -RemoteImageName "ghcr.io/${{ github.repository_owner }}/${{ inputs.imageName }}" @splat
 
     - name: List built images
       run: podman images --filter reference=powershell --format "table {{.Repository}}:{{.Tag}} {{.Size}} {{.Created}}"
