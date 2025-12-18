@@ -15,6 +15,10 @@ param(
 	[string[]]$Architectures = @('amd64', 'arm64'),
 	$LocalImageName = 'powershell',
 	$remoteImageName = 'ghcr.io/justingrote/powershell',
+	#Known bad versions for whatever reason
+	$skipVersions = @(
+		'powershell:7.5.0-preview.3-noble-chiseled'
+	),
 	#Push to remote repo
 	[switch]$Push,
 	#By default, does not rebuild images that already exist. Use -Force to override.
@@ -299,6 +303,10 @@ foreach ($release in $pwshReleases) {
 		}
 
 		if ($doBuild) {
+			if ($skipVersions -contains $powershellImageTag) {
+				Write-Verbose "🔨❌ Skipping known bad image $powershellImageTag"
+				continue
+			}
 			Write-Verbose "🔨 Building PowerShell $powershellImageTag for distribution $distribution"
 			$buildContainerParams = @{
 				release                  = $release
