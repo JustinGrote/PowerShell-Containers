@@ -21,6 +21,40 @@ param(
 	[switch]$Force
 )
 
+function Write-GitHubActionError {
+	param(
+		[Parameter(Mandatory = $true)]
+		$ErrorRecord
+	)
+
+	$ex = $ErrorRecord.Exception
+	$msg = if ($ex) { $ex.Message } else { $ErrorRecord.ToString() }
+	$stack = if ($ex -and $ex.StackTrace) { $ex.StackTrace } elseif ($ErrorRecord.ScriptStackTrace) { $ErrorRecord.ScriptStackTrace } else { '' }
+	$file = $ErrorRecord.InvocationInfo.ScriptName
+	$line = $ErrorRecord.InvocationInfo.ScriptLineNumber
+	$column = $ErrorRecord.InvocationInfo.OffsetInLine
+
+	$text = $msg
+	if ($stack) { $text += "`n`nStacktrace:`n$stack" }
+
+	# Escape characters for GitHub Actions workflow commands
+	$text = $text -replace '%', '%25'
+	$text = [regex]::Replace($text, "\r?\n", '%0A')
+	$text = $text -replace '\[', '%5B'
+	$text = $text -replace '\]', '%5D'
+
+	if ($file) {
+		Write-Host "::error file=$file,line=$line,col=$column,title=::$text"
+	} else {
+		Write-Host "::error::$text"
+	}
+}
+
+trap {
+	Write-GitHubActionError $_
+	exit 1
+}
+
 function Get-AdditionalTags {
 	param(
 		$version,
@@ -232,7 +266,7 @@ assets
 #These releases are what we will actually build and push, but we still need to "process" all releases to accurate determine the rollup tags like 7, latest, lts, etc.
 [SemanticVersion[]]$selectedReleases = $Versions ?
 	($pwshReleases | Where-Object { $Versions -contains $_.Version }).Version :
-$pwshReleases
+$pwshReleases.Version
 
 if (-not $selectedReleases) {
 	$noVersionFoundMessage = $Versions ? "No matching versions found for specified versions: $($Versions -join ', ')." : "No versions found greater than minimum version $minimumPSVersion."
@@ -296,7 +330,7 @@ foreach ($release in $pwshReleases) {
 				[string[]]$psExtraTags = $additionalTags | ForEach-Object {
 					"${LocalImageName}:$_"
 				}
-				Write-Verbose "🏷️  Adding Tags: $psExtraTags"
+				Write-Verbose "🏷️ Adding Tags: $psExtraTags"
 				podman tag $powershellImageTag @psExtraTags
 			}
 		}

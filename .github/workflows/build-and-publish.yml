@@ -2,14 +2,6 @@ name: Build and Publish PowerShell Containers
 
 on:
   push:
-    inputs:
-      imageName:
-        description: 'Container image name (e.g. powershell-test)'
-        required: true
-        default: 'powershell-test'
-      specificVersions:
-        description: 'PowerShell versions to build (comma-separated, e.g. 7.2.6,7.3.4)'
-        required: false
     branches:
       - main
     paths:
@@ -66,12 +58,22 @@ jobs:
       shell: pwsh
       run: |
         # The login step above doesn't seem to persist for some reason, so re-login here
-        podman login ghcr.io/${{ github.repository_owner }}
+        podman login ghcr.io/${{ env.repo_owner_lower }}
         $splat = @()
+
+        #We need to handle if no inputs were provided, for example during a push
         if ('${{ inputs.specificVersions }}' -ne '') {
           $splat['Versions'] = '${{ inputs.specificVersions }}'
         }
-        ./build.ps1 -Verbose -Debug -Push -Architecture amd64 -RemoteImageName "ghcr.io/${{ github.repository_owner }}/${{ inputs.imageName }}" @splat
+        $imageName = '${{ inputs.imageName }}'
+        if ('${{ inputs.imageName }}' -eq '') {
+          if ($env:GITHUB_REF_NAME -eq 'main') {
+            $imageName = 'powershell'
+          } else {
+            $imageName = 'powershell-test'
+          }
+        }
+        ./build.ps1 -Verbose -Debug -Push -Architecture amd64 -RemoteImageName "ghcr.io/${{ env.repo_owner_lower }}/$imageName" @splat
 
     - name: List built images
       run: podman images --filter reference=powershell --format "table {{.Repository}}:{{.Tag}} {{.Size}} {{.Created}}"
