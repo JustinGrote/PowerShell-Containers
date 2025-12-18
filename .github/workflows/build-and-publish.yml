@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - ci
     paths:
       - build.ps1
       - .github/workflows/build-and-publish.yml
@@ -16,7 +17,7 @@ on:
       specificVersions:
         description: 'PowerShell versions to build (comma-separated, e.g. 7.2.6,7.3.4)'
         required: true
-        default: '7.5.4'
+        default: ''
 
 permissions:
   contents: read
