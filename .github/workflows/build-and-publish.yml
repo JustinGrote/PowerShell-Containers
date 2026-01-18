@@ -74,7 +74,7 @@ jobs:
             $imageName = 'powershell-test'
           }
         }
-        ./build.ps1 -Verbose -Debug -Push -Architecture amd64 -RemoteImageName "ghcr.io/${{ env.repo_owner_lower }}/$imageName" @splat
+        ./build.ps1 -Verbose -Debug -Push -RemoteImageName "ghcr.io/${{ env.repo_owner_lower }}/$imageName" @splat
 
     - name: List built images
       run: podman images --filter reference=powershell --format "table {{.Repository}}:{{.Tag}} {{.Size}} {{.Created}}"
