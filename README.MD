@@ -28,7 +28,7 @@ By default the container will run any powershell script passed to it as an argum
 
 ## 🏷️ Tags
 > [!NOTE]
-Unless otherwise specified, the base distro is [Azure Linux 3.0 distroless](https://github.com/dotnet/dotnet-docker/blob/main/documentation/azurelinux.md)
+The default distro is [.NET Chiseled](https://github.com/dotnet/dotnet-docker/blob/main/documentation/ubuntu-chiseled.md). [Azure Linux 3.0 distroless](https://github.com/dotnet/dotnet-docker/blob/main/documentation/azurelinux.md) is also available.
 
 * `latest` - latest stable version
 * `lts` - latest lts version
@@ -37,7 +37,7 @@ Unless otherwise specified, the base distro is [Azure Linux 3.0 distroless](http
 * `X.Y` - latest feature version. For example: `7.4` is latest 7.4.Z version.
 * `7.X.Y` - "pinned" version to the version you specify. For example: `7.4.2` will always be `7.4.2`
 * `azurelinux3.0-distroless` - latest stable version using [.NET Azure Linux 3.0 distroless](https://github.com/dotnet/dotnet-docker/blob/main/documentation/azurelinux.md)
-* `noble-chiseled` - latest stable version using [.NET Chiseled](https://github.com/dotnet/dotnet-docker/blob/main/documentation/ubuntu-chiseled.md)
+* `noble-chiseled` - latest stable version using 
 
 > [!TIP]
 There are direct tags you can pin to a specific version and architecture. These tags should be considered relatively stable but not immutable, as changes to the image build process or bugfixes may be required, but the PowerShell version specified will remain the same.
