@@ -16,13 +16,10 @@ on:
         default: 'powershell-test'
       specificVersions:
         description: 'PowerShell versions to build (comma-separated, e.g. 7.2.6,7.3.4)'
-        required: true
+        required: false
         default: ''
-      push:
-        description: 'Whether to push the built images to the registry'
-        type: boolean
       clobber:
-        description: 'Whether to overwrite existing images in the registry if they already exist. Use with caution as this will force a rebuild and push of all specified versions.'
+        description: 'Overwrite existing remote images in the registry. Use with caution as this will force a rebuild and push of all specified versions.'
         type: boolean
 
 permissions:
@@ -82,7 +79,8 @@ jobs:
           }
         }
 
-        $splat['Push'] = '${{ inputs.push }}' -eq 'true' ? $true : $false
+        # $splat['Push'] = '${{ inputs.push }}' -eq 'true' ? $true : $false
+        $split['Push'] = $true
         $splat['Clobber'] = '${{ inputs.clobber }}' -eq 'true' ? $true : $false
 
         ./build.ps1 -Verbose -Debug -Architecture amd64 -RemoteImageName "ghcr.io/${{ env.repo_owner_lower }}/$imageName" @splat

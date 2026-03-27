@@ -315,7 +315,7 @@ foreach ($release in $pwshReleases) {
 			Write-Verbose "⚪ Skipping build for already built image $powershellImageTag"
 			continue
 		}
-		& podman manifest inspect "${remoteImageName}:$powershellTag" | Out-Null
+		& podman manifest inspect "${remoteImageName}:$powershellTag" *>&1 | Out-Null
 		#NOTE: Exit code 0 means the tag exists. 127 means it does not
 		if ($LASTEXITCODE -eq 0 -and -not $Clobber) {
 			Write-Verbose "⚪ Skipping build for already existing remote image ${remoteImageName}:$powershellTag. Specify -ForcePush to override"
