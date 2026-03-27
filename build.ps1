@@ -18,9 +18,12 @@ param(
 	#Known bad versions for whatever reason
 	$skipVersions = @(
 		'powershell:7.5.0-preview.3-noble-chiseled'
+		'powershell:7.5.0-preview.3-azurelinux3.0-distroless'
 	),
 	#Push to remote repo
 	[switch]$Push,
+	#Overwrite existing remote images. This is only generally needed if you made a change to the build process and want to rebuild and push the same versions again. By default, if the image already exists remotely, it will skip the build and push process for that image. Use this switch to override that behavior and force a rebuild and push for all specified versions.
+	[switch]$Clobber,
 	#By default, does not rebuild images that already exist. Use -Force to override.
 	[switch]$Force
 )
@@ -43,7 +46,7 @@ function Write-GitHubActionError {
 
 	# Escape characters for GitHub Actions workflow commands
 	$text = $text -replace '%', '%25'
-	$text = [regex]::Replace($text, "\r?\n", '%0A')
+	$text = [regex]::Replace($text, '\r?\n', '%0A')
 	$text = $text -replace '\[', '%5B'
 	$text = $text -replace '\]', '%5D'
 
@@ -269,7 +272,7 @@ assets
 
 #These releases are what we will actually build and push, but we still need to "process" all releases to accurate determine the rollup tags like 7, latest, lts, etc.
 [SemanticVersion[]]$selectedReleases = $Versions ?
-	($pwshReleases | Where-Object { $Versions -contains $_.Version }).Version :
+($pwshReleases | Where-Object { $Versions -contains $_.Version }).Version :
 $pwshReleases.Version
 
 if (-not $selectedReleases) {
@@ -297,10 +300,17 @@ foreach ($release in $pwshReleases) {
 		if (-not $isSelectedRelease) {
 			Write-Verbose "⚪ Skipping build for non-selected image $powershellImageTag"
 			$doBuild = $false
-		} elseif (-not $Force -and $existingImages -contains $powershellTag) {
+		}
+		if (-not $Force -and $existingImages -contains $powershellTag) {
 			Write-Verbose "⚪ Skipping build for already built image $powershellImageTag"
 			$doBuild = $false
 		}
+		$remoteExists = & podman manifest inspect "${remoteImageName}:$powershellTag" *>&1
+		if ($LASTEXITCODE -eq 0 -and -not $Clobber) {
+			Write-Verbose "⚪ Skipping build for already existing remote image ${remoteImageName}:$powershellTag. Specify -ForcePush to override"
+			$doBuild = $false
+		}
+
 
 		if ($doBuild) {
 			if ($skipVersions -contains $powershellImageTag) {
