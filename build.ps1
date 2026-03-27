@@ -17,9 +17,12 @@ param(
 	$remoteImageName = 'ghcr.io/justingrote/powershell',
 	#Known bad versions for whatever reason
 	$skipVersions = @(
-		'7.5.0-preview.3'
-		'7.5.0-preview.2'
-		'7.5.0-preview.1'
+		'7.5.0-preview.3-noble-chiseled'
+		'7.5.0-preview.3-azurelinux3.0-distroless'
+		'7.5.0-preview.2-noble-chiseled'
+		'7.5.0-preview.2-azurelinux3.0-distroless'
+		'7.5.0-preview.1-noble-chiseled'
+		'7.5.0-preview.1-azurelinux3.0-distroless'
 	),
 	#Push to remote repo
 	[switch]$Push,
