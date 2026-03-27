@@ -18,6 +18,10 @@ on:
         description: 'PowerShell versions to build (comma-separated, e.g. 7.2.6,7.3.4)'
         required: true
         default: ''
+      push:
+        description: 'Whether to push the built images to the registry'
+        required: true
+        default: 'true'
 
 permissions:
   contents: read
@@ -60,12 +64,13 @@ jobs:
       run: |
         # The login step above doesn't seem to persist for some reason, so re-login here
         podman login ghcr.io/${{ env.repo_owner_lower }}
-        $splat = @()
+        $splat = @{}
 
         #We need to handle if no inputs were provided, for example during a push
         if ('${{ inputs.specificVersions }}' -ne '') {
-          $splat['Versions'] = '${{ inputs.specificVersions }}'
+          $splat['Versions'] = '${{ inputs.specificVersions }}' -split ',' | ForEach-Object Trim
         }
+
         $imageName = '${{ inputs.imageName }}'
         if ('${{ inputs.imageName }}' -eq '') {
           if ($env:GITHUB_REF_NAME -eq 'main') {
@@ -74,7 +79,10 @@ jobs:
             $imageName = 'powershell-test'
           }
         }
-        ./build.ps1 -Verbose -Debug -Push -Architecture amd64 -RemoteImageName "ghcr.io/${{ env.repo_owner_lower }}/$imageName" @splat
+
+        $splat['Push'] = '${{ inputs.push }}' -eq 'true' ? $true : $false
+
+        ./build.ps1 -Verbose -Debug -Architecture amd64 -RemoteImageName "ghcr.io/${{ env.repo_owner_lower }}/$imageName" @splat
 
     - name: List built images
       run: podman images --filter reference=powershell --format "table {{.Repository}}:{{.Tag}} {{.Size}} {{.Created}}"
