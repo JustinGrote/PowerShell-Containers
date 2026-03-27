@@ -19,6 +19,10 @@ param(
 	$skipVersions = @(
 		'powershell:7.5.0-preview.3-noble-chiseled'
 		'powershell:7.5.0-preview.3-azurelinux3.0-distroless'
+		'powershell:7.5.0-preview.2-noble-chiseled'
+		'powershell:7.5.0-preview.2-azurelinux3.0-distroless'
+		'powershell:7.5.0-preview.1-noble-chiseled'
+		'powershell:7.5.0-preview.1-azurelinux3.0-distroless'
 	),
 	#Push to remote repo
 	[switch]$Push,
