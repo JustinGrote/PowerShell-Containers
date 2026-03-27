@@ -289,7 +289,8 @@ if (-not $selectedReleases) {
 [System.Collections.Generic.HashSet[string]]$latestTag = @()
 
 [string[]]$existingImages = & podman images $LocalImageName --format '{{.Tag}}'
-#Generate the Azure Linux Distroless Images
+
+#Generate the images
 foreach ($release in $pwshReleases) {
 	foreach ($distribution in $Distributions) {
 		[SemanticVersion]$version = $release.Version
@@ -298,63 +299,61 @@ foreach ($release in $pwshReleases) {
 		$powershellTag = "$version-$distribution"
 		$powershellImageTag = "$LocalImageName`:$powershellTag"
 
-		$isSelectedRelease = $selectedReleases -contains $Version
+		#Check for rollup tag candidates. This must run for EVERY POSSIBLE RELEASE regardless of build to ensure accurate tagging.
+		[string[]]$additionalTags = Get-AdditionalTags -version $version -releaseMajorMinorVersion $releaseMajorMinorVersion -distribution $distribution -latestTag $latestTag
+		if ($additionalTags) {
+			Write-Verbose "Additional tags found for ${powershellImageTag}: $($additionalTags -join ', ')"
+		}
 
-		$doBuild = $true
+		$isSelectedRelease = $selectedReleases -contains $version
+
 		if (-not $isSelectedRelease) {
 			Write-Verbose "⚪ Skipping build for non-selected image $powershellImageTag"
-			$doBuild = $false
+			continue
 		}
 		if (-not $Force -and $existingImages -contains $powershellTag) {
 			Write-Verbose "⚪ Skipping build for already built image $powershellImageTag"
-			$doBuild = $false
+			continue
 		}
-		$remoteExists = & podman manifest inspect "${remoteImageName}:$powershellTag" *>&1
+		& podman manifest inspect "${remoteImageName}:$powershellTag" | Out-Null
+		#NOTE: Exit code 0 means the tag exists. 127 means it does not
 		if ($LASTEXITCODE -eq 0 -and -not $Clobber) {
 			Write-Verbose "⚪ Skipping build for already existing remote image ${remoteImageName}:$powershellTag. Specify -ForcePush to override"
-			$doBuild = $false
+			continue
+		}
+		if ($skipVersions -contains $powershellTag) {
+			Write-Verbose "🔨❌ Skipping known bad image $powershellTag"
+			continue
 		}
 
-
-		if ($doBuild) {
-			if ($skipVersions -contains $powershellImageTag) {
-				Write-Verbose "🔨❌ Skipping known bad image $powershellImageTag"
-				continue
-			}
-			Write-Verbose "🔨 Building PowerShell $powershellImageTag for distribution $distribution"
-			$buildContainerParams = @{
-				release                  = $release
-				distribution             = $distribution
-				version                  = $version
-				releaseMajorMinorVersion = $releaseMajorMinorVersion
-				powershellTag            = $powershellTag
-				powershellImageTag       = $powershellImageTag
-				Architectures            = $Architectures
-				LocalImageName           = $LocalImageName
-				remoteImageName          = $remoteImageName
-				Push                     = $Push
-				Force                    = $Force
-				latestTag                = $latestTag
-			}
-			$returnedTag = Build-Container @buildContainerParams
-			if ($null -eq $returnedTag) {
-				Write-Error -ErrorAction Continue "❌ Failed to build image for PowerShell version $version on distribution $distribution"
-				continue
-			}
+		Write-Verbose "🔨 Building PowerShell $powershellImageTag for distribution $distribution"
+		$buildContainerParams = @{
+			release                  = $release
+			distribution             = $distribution
+			version                  = $version
+			releaseMajorMinorVersion = $releaseMajorMinorVersion
+			powershellTag            = $powershellTag
+			powershellImageTag       = $powershellImageTag
+			Architectures            = $Architectures
+			LocalImageName           = $LocalImageName
+			remoteImageName          = $remoteImageName
+			Push                     = $Push
+			Force                    = $Force
+			latestTag                = $latestTag
 		}
 
-		#Check for rollup tag candidates. Since we start with Azure Linux, it will always default to those distro images first. This must run for EVERY POSSIBLE RELEASE regardless of build to ensure accurate tagging.
-		[string[]]$additionalTags = Get-AdditionalTags -version $version -releaseMajorMinorVersion $releaseMajorMinorVersion -distribution $distribution -latestTag $latestTag
+		$returnedTag = Build-Container @buildContainerParams
+		if ($null -eq $returnedTag) {
+			Write-Error -ErrorAction Continue "❌ Failed to build image for PowerShell version $version on distribution $distribution"
+			continue
+		}
 
 		if ($additionalTags) {
-			Write-Debug "Additional Tags detected for ${powershellImageTag}: $($additionalTags -join ', ')"
-			if ($doBuild) {
-				[string[]]$psExtraTags = $additionalTags | ForEach-Object {
-					"${LocalImageName}:$_"
-				}
-				Write-Verbose "🏷️ Adding Tags: $psExtraTags"
-				podman tag $powershellImageTag @psExtraTags
+			[string[]]$psExtraTags = $additionalTags | ForEach-Object {
+				"${LocalImageName}:$_"
 			}
+			Write-Verbose "🏷️ Adding Tags: $psExtraTags"
+			podman tag $powershellImageTag @psExtraTags
 		}
 
 		if ($Push -and $isSelectedRelease) {
