@@ -20,12 +20,10 @@ on:
         default: ''
       push:
         description: 'Whether to push the built images to the registry'
-        required: true
-        default: 'true'
+        type: boolean
       clobber:
         description: 'Whether to overwrite existing images in the registry if they already exist. Use with caution as this will force a rebuild and push of all specified versions.'
-        required: true
-        default: 'false'
+        type: boolean
 
 permissions:
   contents: read
