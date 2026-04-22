@@ -29,7 +29,7 @@ permissions:
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
-    environment: Github Container Registry - Test
+    environment: ${{ (inputs.imageName == 'powershell' || github.ref_name == 'main') && 'Github Container Registry' || 'Github Container Registry - Test' }}
     env:
       ACTIONS_STEP_DEBUG: ${{ secrets.ACTIONS_STEP_DEBUG }}
     steps:
