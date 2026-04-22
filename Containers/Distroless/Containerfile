@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 #These args will vary based on the build. This is a multi-arch build
 ARG DIST=noble-chiseled
 ARG PS_VERSION=7.5.1
@@ -20,6 +22,8 @@ ARG TAG=$PS_VERSION-$DIST-$TARGETARCH
 FROM --platform=$BUILDPLATFORM alpine AS install-powershell
 ARG PS_INSTALL_FOLDER PS_VERSION PS_PACKAGE_BASE_URL TARGETARCH TARGETPLATFORM
 #Passed thru so it can reach the configure stage
+RUN mkdir -p $PS_INSTALL_FOLDER
+WORKDIR $PS_INSTALL_FOLDER
 RUN <<SCRIPT
 if [ "${TARGETARCH}" = "amd64" ]; then
 	PSARCH="x64"
@@ -31,28 +35,24 @@ else
 fi
 
 #Fetch and extract the appropriate zip
+
+echo "Fetching PowerShell $PS_VERSION for $TARGETARCH from $PS_PACKAGE_BASE_URL-$PSARCH.tar.gz"
 wget -O /tmp/linux.tar.gz $PS_PACKAGE_BASE_URL-$PSARCH.tar.gz
-mkdir -p $PS_INSTALL_FOLDER
 echo "Extracting to $PS_INSTALL_FOLDER"
 tar zxf /tmp/linux.tar.gz -C $PS_INSTALL_FOLDER
 chmod a+x,o-w ${PS_INSTALL_FOLDER}/pwsh
 chmod a+x,o-w ${PS_INSTALL_FOLDER}/pwsh.dll
-SCRIPT
 
-
-#Cleanup unnecessary items
-WORKDIR $PS_INSTALL_FOLDER
-RUN <<SCRIPT
 # Unnecessary Modules for runtime
 rm -rf Schemas Modules/PowerShellGet Modules/Microsoft.PowerShell.PSResourceGet Modules/PackageManagement Modules/PSReadLine
 #Unnecessary localization
 rm -rf zh-Hans zh-Hant cs de es fr it ja ko pl pt-BR tr ru _manifest ref
 
 # Additional Unnecessary Extras
-rm Microsoft.PowerShell.*.xml
-rm ThirdPartyNotices.txt
-rm System.Directory*.dll System.Data.SqlClient.dll System.Data.Odbc.dll
-rm System.Drawing.Common.dll System.Speech.dll
+rm -v Microsoft.PowerShell.*.xml
+rm -v ThirdPartyNotices.txt
+rm -v System.Directory*.dll System.Data.SqlClient.dll System.Data.Odbc.dll
+rm -v System.Drawing.Common.dll System.Speech.dll
 SCRIPT
 
 #STAGE: Configure PowerShell

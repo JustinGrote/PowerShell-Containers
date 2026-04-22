@@ -8,6 +8,7 @@ param(
 	[SemanticVersion]$minimumPSVersion = '7.4',
 	#For now, our build process is the same for both. This may change in the future
 	$Distributions = @(
+		'resolute-chiseled'
 		'noble-chiseled'
 		'azurelinux3.0-distroless'
 	),
@@ -100,6 +101,9 @@ function Get-AdditionalTags {
 		#Distro tag processing
 		if ($latestTag.Add($distribution)) {
 			$additionalTags += $distribution
+		}
+		if ($distribution -match 'chiseled$' -and $latestTag.Add('dotnet-chiseled')) {
+			$additionalTags += 'resolute'
 		}
 	}
 	if ($version.PrereleaseLabel) {
@@ -271,7 +275,7 @@ tag_name,
 },
 name,
 assets
-| Where-Object Version -GT $minimumPSVersion
+| Where-Object Version -GE $minimumPSVersion
 | Sort-Object Version -Descending
 
 #These releases are what we will actually build and push, but we still need to "process" all releases to accurate determine the rollup tags like 7, latest, lts, etc.
@@ -323,6 +327,10 @@ foreach ($release in $pwshReleases) {
 		}
 		if ($skipVersions -contains $powershellTag) {
 			Write-Verbose "🔨❌ Skipping known bad image $powershellTag"
+			continue
+		}
+		if ($version -lt '7.6.0' -and $distribution -eq 'resolute-chiseled') {
+			Write-Verbose "🔨❌ Skipping version $version for distribution $distribution because resolute isn't supported below .NET 10"
 			continue
 		}
 
