@@ -103,7 +103,7 @@ function Get-AdditionalTags {
 			$additionalTags += $distribution
 		}
 		if ($distribution -match 'chiseled$' -and $latestTag.Add('dotnet-chiseled')) {
-			$additionalTags += 'resolute'
+			$additionalTags += 'dotnet-chiseled'
 		}
 	}
 	if ($version.PrereleaseLabel) {
