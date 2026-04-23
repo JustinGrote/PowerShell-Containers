@@ -37,13 +37,15 @@ The default distro is [.NET Chiseled](https://github.com/dotnet/dotnet-docker/bl
 * `X.Y` - latest feature version. For example: `7.4` is latest 7.4.Z version.
 * `7.X.Y` - "pinned" version to the version you specify. For example: `7.4.2` will always be `7.4.2`
 * `azurelinux3.0-distroless` - latest stable version using [.NET Azure Linux 3.0 distroless](https://github.com/dotnet/dotnet-docker/blob/main/documentation/azurelinux.md)
-* `noble-chiseled` - latest stable version using 
+* `dotnet-chiseled` - latest stable version using latest .NET Chiseled
+* `noble-chiseled` - latest stable version using .NET Chiseled for Ubuntu 24.04 (Noble)
+* `resolute-chiseled` - latest stable using .NET Chiseled for Ubuntu 26.04 (Resolute)
 
 > [!TIP]
-There are direct tags you can pin to a specific version and architecture. These tags should be considered relatively stable but not immutable, as changes to the image build process or bugfixes may be required, but the PowerShell version specified will remain the same.
+Tags should not be considered immutable and are provided for convenience. I reserve the right to make breaking changes to any tag at any time. You should pin specific SHA versions if stability and predictability is a need in your environment, and to avoid unlikely but possible supply chain attacks to this repository. That said, most tags should remain relatively stable, e.g. 7.4 will always be the latest version of 7.4, but the underlying container architecture might undergo minor changes.
 
 ## 📦 Bundling
-To create new container applications, define a new dockerfile that bundles your script.
+To create new container applications, define a new `Dockerfile` or `Containerfile` that bundles your script and any modules or components your script requires.
 
 * [Standalone Script Example](Examples/Script/README.MD)
 * [Script with Modules Example](Examples/ScriptWithModules/README.MD)
@@ -51,7 +53,9 @@ To create new container applications, define a new dockerfile that bundles your 
 
 ## About These Containers
 
-These images run the self-contained version of PowerShell on top of the dotnet/runtime-deps container, with some additional features removed to reduce size:
+These images run the self-contained version of PowerShell on top of distroless container bases to minimize size and security surface.
+
+### Removed Features for size/security:
 1. PowerShellGet/PSResourceGet/PackageManagement removed (you should bundle modules into your container directly)
 1. Help Removed
 1. PSReadline Removed (this is not meant for interactive use)
@@ -71,3 +75,4 @@ While fxdependent is smaller, the self-contained images contain precompliation t
 ## Updates
 
 There are plans to auto-generate new images upon new PowerShell release within 24 hours, potentially as soon as a release is posted.
+For now releases are generated to powershell-test, smoke tested manually, and then graduated to powershell
