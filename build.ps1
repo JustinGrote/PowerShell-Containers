@@ -333,6 +333,10 @@ foreach ($release in $pwshReleases) {
 			Write-Verbose "🔨❌ Skipping version $version for distribution $distribution because resolute isn't supported below .NET 10"
 			continue
 		}
+		if ($version -gt '7.7.0-0' -and $distribution -eq 'noble-chiseled') {
+			Write-Verbose "🔨❌ Skipping version $version for distribution $distribution because it isn't supported in .NET 11+"
+			continue
+		}
 
 		Write-Verbose "🔨 Building PowerShell $powershellImageTag for distribution $distribution"
 		$buildContainerParams = @{
