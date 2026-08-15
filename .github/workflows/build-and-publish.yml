@@ -83,7 +83,7 @@ jobs:
         $splat['Push'] = $true
         $splat['Clobber'] = '${{ inputs.clobber }}' -eq 'true' ? $true : $false
 
-        ./build.ps1 -Verbose -Debug -RemoteImageName "ghcr.io/${{ env.repo_owner_lower }}/$imageName" @splat
+        ./build.ps1 -Verbose -RemoteImageName "ghcr.io/${{ env.repo_owner_lower }}/$imageName" @splat
 
     - name: List built images
       run: podman images --filter reference=powershell --format "table {{.Repository}}:{{.Tag}} {{.Size}} {{.Created}}"
